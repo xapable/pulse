@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { Save, Pin, Copy, Check, PinOff } from 'lucide-react';
-import type { Idea, Tone, ContentLength, PostAngle } from '@/types';
+import type { Idea, Tone, ContentLength, PostAngle, PostType } from '@/types';
 import { LENGTH_LABELS } from '@/types';
 
 interface IdeaCardProps {
   title: string;
   description: string;
+  type?: PostType;
   tone?: Tone;
   length?: ContentLength;
   angle?: PostAngle;
@@ -61,6 +62,13 @@ export default function IdeaCard({
     <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-5 space-y-3 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all">
       {/* Status badges */}
       <div className="flex items-center gap-2 flex-wrap">
+        {type && (
+          <span className={`px-2 py-0.5 text-[11px] rounded-full text-white font-medium ${
+            type === 'blog' ? 'bg-blue-500' : 'bg-pink-500'
+          }`}>
+            {type === 'blog' ? 'Blog' : 'IG'}
+          </span>
+        )}
         {tone && (
           <span className="px-2 py-0.5 text-[11px] rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
             {tone}

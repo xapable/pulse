@@ -8,6 +8,7 @@ import type {
   PostAngle,
   GenerationCount,
   GenerationOptions,
+  PostType,
 } from '@/types';
 import {
   TONE_OPTIONS,
@@ -15,6 +16,7 @@ import {
   LENGTH_LABELS,
   ANGLE_OPTIONS,
   COUNT_OPTIONS,
+  POST_TYPES,
 } from '@/types';
 import { Loader2, Sparkles, ChevronDown, FileText, PencilLine } from 'lucide-react';
 
@@ -22,6 +24,7 @@ interface IdeaInputProps {
   onIdeasGenerated: (ideas: { title: string; description: string }[]) => void;
   onSourceTextChange: (text: string) => void;
   onOptionsChange: (options: GenerationOptions) => void;
+  onPostTypeChange?: (type: PostType) => void;
   basePrompt: string;
 }
 
@@ -29,6 +32,7 @@ export default function IdeaInput({
   onIdeasGenerated,
   onSourceTextChange,
   onOptionsChange,
+  onPostTypeChange,
   basePrompt,
 }: IdeaInputProps) {
   const { user } = useAuth();
@@ -37,6 +41,7 @@ export default function IdeaInput({
   const [length, setLength] = useState<ContentLength>('中');
   const [angle, setAngle] = useState<PostAngle>('教育');
   const [count, setCount] = useState<GenerationCount>(3);
+  const [postType, setPostType] = useState<PostType>('ig_post');
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -97,6 +102,7 @@ export default function IdeaInput({
           length,
           angle,
           count,
+          postType,
           userApiKey: userApiKey || undefined,
           userProvider: localStorage.getItem('pulse_provider') || undefined,
           userModel: localStorage.getItem('pulse_model') || undefined,
@@ -273,6 +279,29 @@ export default function IdeaInput({
               }`}
             >
               {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Post Type Selector */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-zinc-400 mr-1">類型</span>
+        <div className="flex gap-1">
+          {POST_TYPES.map((pt) => (
+            <button
+              key={pt.value}
+              onClick={() => {
+                setPostType(pt.value);
+                onPostTypeChange?.(pt.value);
+              }}
+              className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                postType === pt.value
+                  ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                  : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400'
+              }`}
+            >
+              {pt.label}
             </button>
           ))}
         </div>

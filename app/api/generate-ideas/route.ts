@@ -8,17 +8,24 @@ function buildPrompt(sourceText: string, options: {
   length: string;
   angle: string;
   count: number;
+  postType?: string;
 }): string {
-  const lengthHint =
-    options.length === '短' ? '短=1-2句' :
-    options.length === '中' ? '中=3-5句' : '長=5-8句';
+  const isBlog = options.postType === 'blog';
+  const lengthHint = isBlog
+    ? (options.length === '短' ? '短=150-300字' : options.length === '中' ? '中=300-600字' : '長=600-1000字')
+    : (options.length === '短' ? '短=1-2句' : options.length === '中' ? '中=3-5句' : '長=5-8句');
 
-  return `你係一個專業嘅社交媒體行銷專家，擅長為品牌構思 IG Post 靈感。
+  const persona = isBlog
+    ? '你係一個專業嘅內容行銷專家，擅長為品牌撰寫高質量嘅 Blog 文章'
+    : '你係一個專業嘅社交媒體行銷專家，擅長為品牌構思 IG Post 靈感';
+
+  return `${persona}。
 
 用戶輸入嘅公司/產品資料：
 ${sourceText}
 
 生成要求：
+- 內容類型：${isBlog ? 'Blog 文章' : 'IG Post'}
 - 語氣：${options.tone}
 - 內容長度：${options.length}（${lengthHint}）
 - Post 角度：${options.angle}
@@ -26,8 +33,8 @@ ${sourceText}
 請嚴格按照以下 JSON 格式輸出 ${options.count} 個靈感：
 [
   {
-    "title": "靈感標題（繁體中文，10-15字內，吸引眼球）",
-    "description": "靈感描述（繁體中文，解釋呢個 post 可以講咩、點樣講、有咩具體建議）"
+    "title": "靈感標題（繁體中文，10-20字內，吸引眼球）",
+    "description": "靈感描述（繁體中文，解釋呢個內容可以講咩、點樣講、有咩具體建議、適合咩關鍵字）"
   }
 ]
 
@@ -68,6 +75,7 @@ export async function POST(request: NextRequest) {
       length,
       angle,
       count,
+      postType,
       userApiKey,
       userProvider,
       userModel,
@@ -82,7 +90,7 @@ export async function POST(request: NextRequest) {
     const provider = userProvider || 'DeepSeek';
 
     // Build prompt
-    const prompt = buildPrompt(sourceText, { tone, length, angle, count });
+    const prompt = buildPrompt(sourceText, { tone, length, angle, count, postType });
 
     // Only DeepSeek is supported server-side for the default key
     // If user provides their own key, they can use any provider

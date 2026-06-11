@@ -43,6 +43,7 @@ export function useIdeas(projectId: string | null) {
       tone: Tone;
       length: ContentLength;
       angle: PostAngle;
+      type?: 'ig_post' | 'blog';
     }) => {
       if (!user || !projectId) return;
       const id = await createIdea({
@@ -50,7 +51,7 @@ export function useIdeas(projectId: string | null) {
         projectId,
         title: idea.title,
         description: idea.description,
-        type: 'ig_post',
+        type: idea.type || 'ig_post',
         status: 'saved',
         isPinned: false,
         sourceText: idea.sourceText,

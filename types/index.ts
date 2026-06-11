@@ -31,7 +31,7 @@ export interface Idea {
   projectId: string;
   title: string;
   description: string;
-  type: 'ig_post';
+  type: 'ig_post' | 'blog';
   status: 'saved' | 'used' | 'pinned';
   isPinned: boolean;
   sourceText: string;
@@ -51,7 +51,11 @@ export interface ApiSettings {
 
 // ── Generation Options ──
 
-export type Tone = '專業' | '親切' | '幽默' | '激勵' | '教育' | '大膽';
+export type PostType = 'ig_post' | 'blog';
+export const POST_TYPES: { value: PostType; label: string }[] = [
+  { value: 'ig_post', label: 'IG Post' },
+  { value: 'blog', label: 'Blog 文章' },
+]; = '專業' | '親切' | '幽默' | '激勵' | '教育' | '大膽';
 export type ContentLength = '短' | '中' | '長';
 export type PostAngle = '教育' | '娛樂' | '故事' | '提問' | '清單' | '產品' | '社會證明';
 export type GenerationCount = 3 | 5 | 10;

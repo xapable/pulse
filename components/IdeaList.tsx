@@ -1,12 +1,13 @@
 'use client';
 
 import IdeaCard from './IdeaCard';
-import type { GenerationOptions } from '@/types';
+import type { GenerationOptions, PostType } from '@/types';
 
 interface IdeaListProps {
   ideas: { title: string; description: string }[];
   options: GenerationOptions;
   sourceText: string;
+  postType?: PostType;
   savedIds: Set<string>;
   pinnedIds: Set<string>;
   onSave: (idea: { title: string; description: string }, index: number) => Promise<void>;
@@ -17,6 +18,7 @@ export default function IdeaList({
   ideas,
   options,
   sourceText,
+  postType,
   savedIds,
   pinnedIds,
   onSave,
@@ -37,6 +39,7 @@ export default function IdeaList({
               key={key}
               title={idea.title}
               description={idea.description}
+              type={postType}
               tone={options.tone}
               length={options.length}
               angle={options.angle}

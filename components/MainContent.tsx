@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo } from 'react';
-import type { Project, GenerationOptions, ViewMode } from '@/types';
+import type { Project, GenerationOptions, ViewMode, PostType } from '@/types';
 import { useIdeas } from '@/hooks/useIdeas';
 import IdeaInput from './IdeaInput';
 import IdeaList from './IdeaList';
@@ -49,6 +49,7 @@ export default function MainContent({
   });
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [postType, setPostType] = useState<PostType>('ig_post');
   const inputRef = useRef<{ focusInput: () => void }>(null);
 
   const handleIdeasGenerated = useCallback(
@@ -71,10 +72,11 @@ export default function MainContent({
         tone: options.tone,
         length: options.length,
         angle: options.angle,
+        type: postType,
       });
       setSavedIds((prev) => new Set(prev).add(key));
     },
-    [saveIdea, sourceText, options, currentProject],
+    [saveIdea, sourceText, options, currentProject, postType],
   );
 
   const handlePin = useCallback(
@@ -88,6 +90,7 @@ export default function MainContent({
         tone: options.tone,
         length: options.length,
         angle: options.angle,
+        type: postType,
       });
       if (id) {
         const { updateIdea } = await import('@/lib/firebase/firestore');
@@ -97,7 +100,7 @@ export default function MainContent({
         loadIdeas();
       }
     },
-    [saveIdea, sourceText, options, currentProject, loadIdeas],
+    [saveIdea, sourceText, options, currentProject, loadIdeas, postType],
   );
 
   const focusInput = useCallback(() => {
@@ -180,6 +183,7 @@ export default function MainContent({
                     onIdeasGenerated={handleIdeasGenerated}
                     onSourceTextChange={setSourceText}
                     onOptionsChange={setOptions}
+                    onPostTypeChange={setPostType}
                     basePrompt={basePrompt}
                   />
                 </div>
@@ -190,6 +194,7 @@ export default function MainContent({
                     ideas={generatedIdeas}
                     options={options}
                     sourceText={sourceText}
+                    postType={postType}
                     savedIds={savedIds}
                     pinnedIds={pinnedIds}
                     onSave={handleSave}

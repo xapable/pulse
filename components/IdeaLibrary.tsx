@@ -80,6 +80,7 @@ export default function IdeaLibrary({
               key={idea.id}
               title={idea.title}
               description={idea.description}
+              type={idea.type}
               tone={idea.tone}
               length={idea.length}
               angle={idea.angle}
