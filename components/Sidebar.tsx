@@ -17,6 +17,8 @@ import {
   Trash2,
   Building2,
   Sparkles,
+  Pin,
+  PinOff,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,6 +32,7 @@ interface SidebarProps {
   onNewProject: () => void;
   onEditProject: (project: Project) => void;
   onDeleteProject: (project: Project) => void;
+  onTogglePin: (id: string, isPinned: boolean) => void;
 }
 
 export default function Sidebar({
@@ -43,6 +46,7 @@ export default function Sidebar({
   onNewProject,
   onEditProject,
   onDeleteProject,
+  onTogglePin,
 }: SidebarProps) {
   const { profile } = useAuth();
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
@@ -104,7 +108,14 @@ export default function Sidebar({
           </p>
         )}
 
-        {projects.map((project) => (
+        {/* Sort: pinned first */}
+        {[...projects]
+          .sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            return 0;
+          })
+          .map((project) => (
           <div
             key={project.id}
             className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5 transition-colors relative ${
@@ -121,6 +132,9 @@ export default function Sidebar({
               className="flex items-center gap-2 flex-1 min-w-0 text-left"
               title={collapsed ? project.companyName : undefined}
             >
+              {project.isPinned && !collapsed && (
+                <Pin size={12} className="shrink-0 text-amber-500" />
+              )}
               <Building2 size={16} className="shrink-0" />
               {!collapsed && (
                 <span className="text-sm truncate">{project.companyName}</span>
@@ -146,6 +160,20 @@ export default function Sidebar({
                       onClick={() => setMenuOpen(null)}
                     />
                     <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-lg p-1 z-20">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpen(null);
+                          onTogglePin(project.id, !project.isPinned);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                      >
+                        {project.isPinned ? (
+                          <><PinOff size={14} />取消釘選</>
+                        ) : (
+                          <><Pin size={14} />釘選</>
+                        )}
+                      </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

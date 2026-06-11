@@ -22,7 +22,7 @@ export function useIdeas(projectId: string | null) {
     }
     setLoading(true);
     try {
-      const data = await getProjectIdeas(projectId);
+      const data = await getProjectIdeas(user.uid, projectId);
       setIdeas(data);
     } catch (err) {
       console.error('載入靈感失敗:', err);

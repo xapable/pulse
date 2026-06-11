@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { generateIdeas } from '@/lib/ai/client';
 import type {
   Tone,
   ContentLength,
@@ -75,23 +74,42 @@ export default function IdeaInput({
     setGenerating(true);
 
     try {
-      const apiKey = localStorage.getItem('pulse_api_key');
-      const provider = (localStorage.getItem('pulse_provider') || 'OpenAI') as any;
-      const model = localStorage.getItem('pulse_model') || 'gpt-4o';
+      const userApiKey = localStorage.getItem('pulse_api_key');
 
-      if (!apiKey) {
-        setError('請先到設定頁面設定 API Key');
-        setGenerating(false);
-        return;
+      // Trial credit check (5 free generations)
+      if (!userApiKey) {
+        const used = parseInt(localStorage.getItem('pulse_trial_used') || '0', 10);
+        if (used >= 5) {
+          setError('Trial 已用完，請先到設定頁面設定 API Key');
+          setGenerating(false);
+          return;
+        }
+        localStorage.setItem('pulse_trial_used', String(used + 1));
       }
 
-      const ideas = await generateIdeas(provider, model, apiKey, fullPrompt, {
-        tone,
-        length,
-        angle,
-        count,
+      // Call server-side API (API key stays hidden)
+      const res = await fetch('/api/generate-ideas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sourceText: fullPrompt,
+          tone,
+          length,
+          angle,
+          count,
+          userApiKey: userApiKey || undefined,
+          userProvider: localStorage.getItem('pulse_provider') || undefined,
+          userModel: localStorage.getItem('pulse_model') || undefined,
+        }),
       });
-      onIdeasGenerated(ideas);
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || '生成失敗');
+      }
+
+      const data = await res.json();
+      onIdeasGenerated(data.ideas);
     } catch (err: any) {
       setError(err.message || '生成失敗，請重試');
     } finally {
@@ -164,7 +182,7 @@ export default function IdeaInput({
                     setOpenDropdown(null);
                     updateOptions(t, length, angle, count);
                   }}
-                  className={`block w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  className={`block w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors text-zinc-800 dark:text-zinc-200 ${
                     tone === t
                       ? 'bg-zinc-100 dark:bg-zinc-700 font-medium'
                       : 'hover:bg-zinc-50 dark:hover:bg-zinc-700/50'
@@ -195,7 +213,7 @@ export default function IdeaInput({
                     setOpenDropdown(null);
                     updateOptions(tone, l, angle, count);
                   }}
-                  className={`block w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  className={`block w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors text-zinc-800 dark:text-zinc-200 ${
                     length === l
                       ? 'bg-zinc-100 dark:bg-zinc-700 font-medium'
                       : 'hover:bg-zinc-50 dark:hover:bg-zinc-700/50'
@@ -226,7 +244,7 @@ export default function IdeaInput({
                     setOpenDropdown(null);
                     updateOptions(tone, length, a, count);
                   }}
-                  className={`block w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  className={`block w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors text-zinc-800 dark:text-zinc-200 ${
                     angle === a
                       ? 'bg-zinc-100 dark:bg-zinc-700 font-medium'
                       : 'hover:bg-zinc-50 dark:hover:bg-zinc-700/50'

@@ -20,6 +20,7 @@ export interface Project {
   brandTone?: string;
   targetAudience?: string;
   uniqueSellingPoint?: string;
+  isPinned?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

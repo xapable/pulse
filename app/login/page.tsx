@@ -25,7 +25,12 @@ export default function LoginPage() {
       await signInWithGoogle();
       router.push('/');
     } catch (err: any) {
-      setError(err.message || '登入失敗，請重試');
+      const message = err.message || '';
+      if (message.includes('unauthorized-domain')) {
+        setError('此域名未獲 Firebase 授權。請到 Firebase Console → Authentication → Settings → Authorized Domains 添加當前域名。');
+      } else {
+        setError(message || '登入失敗，請重試');
+      }
     } finally {
       setSigningIn(false);
     }

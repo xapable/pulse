@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const DEFAULT_DEEPSEEK_KEY = 'sk-29a8156f41694ffbbd807b9b6c65814f';
+
 // ── Analysis result type ──
 interface AnalysisResult {
   companyDescription?: string;
@@ -149,14 +151,11 @@ async function analyzeWithDeepSeek(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { url, apiKey } = body;
+    const url: string = body.url;
+    const apiKey = body.apiKey || DEFAULT_DEEPSEEK_KEY;
 
     if (!url) {
       return NextResponse.json({ error: '請提供網站 URL' }, { status: 400 });
-    }
-
-    if (!apiKey) {
-      return NextResponse.json({ error: '請先喺設定頁面設定 DeepSeek API Key' }, { status: 400 });
     }
 
     // Fetch website

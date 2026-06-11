@@ -105,10 +105,15 @@ export async function updateProject(id: string, updates: Partial<Omit<Project, '
   await updateDoc(ref, cleanData({ ...updates, updatedAt: serverTimestamp() }));
 }
 
-export async function deleteProject(id: string): Promise<void> {
+export async function togglePinProject(id: string, isPinned: boolean): Promise<void> {
+  const ref = doc(db, PROJECTS, id);
+  await updateDoc(ref, { isPinned, updatedAt: serverTimestamp() });
+}
+
+export async function deleteProject(id: string, userId: string): Promise<void> {
   // Also delete all ideas in this project
   const ideasSnap = await getDocs(
-    query(collection(db, IDEAS), where('projectId', '==', id)),
+    query(collection(db, IDEAS), where('userId', '==', userId), where('projectId', '==', id)),
   );
   const batch = writeBatch(db);
   ideasSnap.docs.forEach((d) => batch.delete(d.ref));
@@ -155,9 +160,10 @@ export async function getUserIdeas(userId: string): Promise<Idea[]> {
   });
 }
 
-export async function getProjectIdeas(projectId: string): Promise<Idea[]> {
+export async function getProjectIdeas(userId: string, projectId: string): Promise<Idea[]> {
   const q = query(
     collection(db, IDEAS),
+    where('userId', '==', userId),
     where('projectId', '==', projectId),
     orderBy('sortOrder', 'desc'),
   );

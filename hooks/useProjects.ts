@@ -7,6 +7,7 @@ import {
   getProjects,
   updateProject as updateProjectDB,
   deleteProject as deleteProjectDB,
+  togglePinProject,
 } from '@/lib/firebase/firestore';
 import { useAuth } from './useAuth';
 
@@ -55,7 +56,16 @@ export function useProjects() {
 
   const removeProject = useCallback(
     async (id: string) => {
-      await deleteProjectDB(id);
+      if (!user) return;
+      await deleteProjectDB(id, user.uid);
+      await loadProjects();
+    },
+    [user, loadProjects],
+  );
+
+  const togglePin = useCallback(
+    async (id: string, isPinned: boolean) => {
+      await togglePinProject(id, isPinned);
       await loadProjects();
     },
     [loadProjects],
@@ -68,5 +78,6 @@ export function useProjects() {
     addProject,
     editProject,
     removeProject,
+    togglePin,
   };
 }

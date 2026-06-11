@@ -9,7 +9,7 @@ import type { Project, ViewMode } from '@/types';
 import { useProjects } from '@/hooks/useProjects';
 
 export default function HomePage() {
-  const { projects, loading: projectsLoading, addProject, editProject, removeProject } = useProjects();
+  const { projects, loading: projectsLoading, addProject, editProject, removeProject, togglePin } = useProjects();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('generate');
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
@@ -20,7 +20,6 @@ export default function HomePage() {
   useEffect(() => {
     if (projectsLoading) return;
     if (projects.length === 0) {
-      setShowNewModal(true);
       setCurrentProjectId(null);
     } else if (!currentProjectId || !projects.find((p) => p.id === currentProjectId)) {
       setCurrentProjectId(projects[0].id);
@@ -87,6 +86,7 @@ export default function HomePage() {
           onNewProject={handleNewProject}
           onEditProject={handleEditProject}
           onDeleteProject={handleDeleteProject}
+          onTogglePin={togglePin}
         />
         <MainContent
           viewMode={viewMode}
